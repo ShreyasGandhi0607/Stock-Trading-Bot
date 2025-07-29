@@ -1,7 +1,5 @@
 # Stock Trading Bot
-[![Star this repo](https://img.shields.io/github/stars/codingforentrepreneurs/Stock-Trading-Bot?style=social)](https://github.com/codingforentrepreneurs/Stock-Trading-Bot)
 
-Learn how to extract data, analyze, and decide on stocks in the market using Django, Celery, TimescaleDB, Jupyter, OpenAI, and more.
 
 
 __Tech Stack__
@@ -13,11 +11,7 @@ __Tech Stack__
 - [Psycopg Binary Release](https://pypi.org/project/psycopg/) (`pip install "psycopg[binary]"`)
 - [Python Requests](https://github.com/HBNetwork/python-decouple) to load environment variables (e.g. `.env`) with type casting and default values.
 - [Polygon.io](https://polygon.io/?utm_source=cfe&utm_medium=github&utm_campaign=cfe-github) ([docs](https://polygon.io/docs/stocks/getting-started?utm_source=cfe&utm_medium=github&utm_campaign=cfe-github))
-- More to come
 
-## Tutorial
-- In-depth setup [on YouTube (https://youtu.be/aApDye1TWJ4)](https://youtu.be/aApDye1TWJ4)
-- Full tutorial (coming soon)
 
 ## Getting Started
 
@@ -27,23 +21,6 @@ Download the following:
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) or Docker Engine via [get.docker.com](https://get.docker.com/) (Linux Install Script)
 - [Python](https://www.python.org/downloads/)
 
-Open a command line (Terminal, VSCode Terminal, Cursor Terminal, Powershell, etc)
-
-Clone this Repo
-```bash
-mkdir -p ~/dev/stock-trading-bot
-cd ~/dev/stock-trading-bot
-git clone https://github.com/codingforentrepreneurs/Stock-Trading-Bot .
-```
-
-Checkout the start branch
-```bash
-git checkout start
-rm -rf .git
-git init
-git add --all
-git commit -m "It's my bot now"
-```
 
 Create a Python vitual environment
 _macOS/Linux/WSL_
