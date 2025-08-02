@@ -11,6 +11,10 @@ class Company(models.Model):
     timestamp= models.DateTimeField(auto_now_add=True)
     updated = models.DateField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        self.ticker = f"{self.ticker}".upper()
+        super().save(*args, **kwargs)
+
 class stockQuote(models.Model):
     """
     'open_price': 192.93,
@@ -36,5 +40,8 @@ class stockQuote(models.Model):
     volume_weighted_average = models.DecimalField(max_digits=10, decimal_places=4)
     time = TimescaleDateTimeField(interval="1 week")
 
-    # objects = models.Manager()
+    objects = models.Manager()
     timescale = TimescaleManager()
+
+    class Meta:
+        unique_together = [('company','time')]
