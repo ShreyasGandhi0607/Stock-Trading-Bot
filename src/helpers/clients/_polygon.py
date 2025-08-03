@@ -28,7 +28,7 @@ def transform_pologyon_result(result):
 @dataclass
 class PologyonAPIClient:
     ticker : str = "AAPL"
-    multiplier : int = 1
+    multiplier : int = 5
     timespan : str = "minute"
     from_date : str = "2025-07-25"
     to_date : str = "2025-07-30"
@@ -43,7 +43,8 @@ class PologyonAPIClient:
     def get_params(self):
         return {
             "adjusted" : self.adjusted,
-            "sort" : self.sort
+            "sort" : self.sort,
+            "limit" : 50_000,
         }
 
     def get_headers(self):
