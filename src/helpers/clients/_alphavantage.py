@@ -28,6 +28,7 @@ def transform_alphavantage_result(timestamp_str, result):
         'number_of_trades' : None,
         'volume' : int(result['5. volume']),
         'volume_weighted_average' : None,
+        'raw_timestamp' : timestamp_str,
         'time' : utc_timestamp
     }
 
