@@ -4,6 +4,7 @@ import helpers.clients as helper_clients
 from django.utils import timezone
 from datetime import timedelta
 from celery import shared_task
+import time
 
 @shared_task
 def sync_company_stock_quotes(company_id,days_ago=32,dateformat="%Y-%m-%d", verbose=False):
@@ -18,10 +19,11 @@ def sync_company_stock_quotes(company_id,days_ago=32,dateformat="%Y-%m-%d", verb
     if company_ticker is None:
         raise Exception(f"{company_ticker} invalid")
     
-    end_date = timezone.now()
-    start_date = end_date - timedelta(days=days_ago)
+    now = timezone.now()
+    start_date = now - timedelta(days=days_ago)
 
-    to_date = end_date.strftime(dateformat)
+    to_date = start_date + timedelta(days=days_ago+1)
+    to_date = to_date.strftime(dateformat)
     from_date = start_date.strftime(dateformat)
 
     client = helper_clients.PologyonAPIClient(
@@ -43,3 +45,18 @@ def sync_stocks_data(days_ago=2):
     for company_id in companies:
         # managed by celery
         sync_company_stock_quotes.delay(company_id=company_id,days_ago=days_ago)
+    
+
+@shared_task
+def sync_historical_stock_data(years_ago=1, company_ids = []):
+    Company = apps.get_model("market", "Company")
+    qs = Company.objects.filter(active=True)
+    if len(company_ids) > 0:
+        qs = qs.filter(id__in=company_ids)
+    companies = qs.values_list('id',flat=True)
+    for company_id in companies:
+        days_starting_ago = 20*12*years_ago
+        batch_size = 30
+        for i in range(30, days_starting_ago, batch_size):
+            sync_company_stock_quotes.delay(company_id=company_id,days_ago=i)
+            time.sleep(1.5)
