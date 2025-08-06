@@ -35,23 +35,27 @@ def transform_alphavantage_result(timestamp_str, result):
 @dataclass
 class AlphaVantageAPIClient:
     ticker : str = "AAPL"
-    function : Literal["TIME_SERIES_INTRADAY"] = "TIME_SERIES_INTRADAY"
+    function: Literal["TIME_SERIES_INTRADAY", "TIME_SERIES_DAILY_ADJUSTED"] = "TIME_SERIES_INTRADAY"
     interval : Literal["1min", "5min", "15min", "30min", "60min"] = "1min"
     api_key : str = ""
     month : str = "2025-07"
+    outputsize: Literal["compact", "full"] = "compact"  
 
     def get_api_key(self):
         return self.api_key or ALPHA_VANTAGE_API_KEY
 
         
     def get_params(self):
-        return {
-            "apikey" : self.get_api_key(),
-            "symbol" : self.ticker,
-            "interval" : self.interval,
-            "function" : self.function,
-            "month" : self.month,
+        params = {
+            "function": self.function,
+            "symbol": self.ticker,
+            "apikey": self.get_api_key(),
         }
+        if self.function == "TIME_SERIES_INTRADAY":
+            params["interval"] = self.interval
+        elif self.function == "TIME_SERIES_DAILY_ADJUSTED":
+            params["outputsize"] = self.outputsize
+        return params
 
     def get_headers(self):
         api_key = self.get_api_key()
@@ -74,17 +78,41 @@ class AlphaVantageAPIClient:
         url = self.generate_url()
         response = requests.get(url, headers=headers)
         response.raise_for_status() # not 200/201
+        print("AlphaVantage raw response:", response.json()) 
         return response.json()
 
     def get_stock_data(self):
         data = self.fetch_data()
-        dataset_key = [x for x in list(data.keys()) if not x.lower() == "meta data"][0]
+            # Handle potential API error messages
+        if not isinstance(data, dict):
+            raise Exception(f"AlphaVantage returned non-dict response: {data}")
+
+        if "Error Message" in data:
+            raise Exception(f"AlphaVantage Error: {data['Error Message']}")
+
+        if "Note" in data:
+            raise Exception(f"AlphaVantage Rate Limit Hit: {data['Note']}")
+        
+
+        # dataset_key = [x for x in list(data.keys()) if not x.lower() == "meta data"][0]
+        dataset_key = next((k for k in data.keys() if "Time Series" in k), None)
+        if not dataset_key:
+            raise Exception(f"No valid time series data found in response: {data}") 
+        
+
         results = data[dataset_key]
-        dataset = []
-        for timestamp_str in results.keys():
-            dataset.append(
-                transform_alphavantage_result(timestamp_str, results.get(timestamp_str))
-            )
+        if not isinstance(results, dict):
+            raise Exception(f"Expected dict for time series data, got {type(results)}")
+        
+        # dataset = []
+        # for timestamp_str in results.keys():
+        #     dataset.append(
+        #         transform_alphavantage_result(timestamp_str, results.get(timestamp_str))
+        #     )
+        dataset = [
+            transform_alphavantage_result(ts, results[ts])
+            for ts in results
+        ]
         return dataset
             
         
